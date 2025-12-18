@@ -10,6 +10,7 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
     Args:
         num_classes: Number of output classes (default: 2 for binary classification)
         model_name: Name of the pretrained model architecture (default: 'resnet18')
+                   Options: 'resnet18', 'resnet50', 'mobilenet_v2'
         freeze_backbone: Whether to freeze backbone weights (default: True)
     
     Returns:
@@ -24,6 +25,7 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
             nn.Dropout(0.3),
             nn.Linear(num_features, num_classes)
         )
+    
     elif model_name == 'resnet50':
         model = models.resnet50(pretrained=True)
         num_features = model.fc.in_features
@@ -31,13 +33,23 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
             nn.Dropout(0.3),
             nn.Linear(num_features, num_classes)
         )
+    
+    elif model_name == 'mobilenet_v2':
+        model = models.mobilenet_v2(pretrained=True)
+        num_features = model.classifier[1].in_features
+        # Replace final classifier
+        model.classifier = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(num_features, num_classes)
+        )
+    
     else:
-        raise ValueError(f"Model {model_name} not supported. Use 'resnet18' or 'resnet50'.")
+        raise ValueError(f"Model {model_name} not supported. Use 'resnet18', 'resnet50', or 'mobilenet_v2'.")
     
     # Freeze backbone layers if specified
     if freeze_backbone:
         for name, param in model.named_parameters():
-            if 'fc' not in name:  # Don't freeze the classifier head
+            if 'fc' not in name and 'classifier' not in name:  # Don't freeze the classifier head
                 param.requires_grad = False
     
     return model
