@@ -1,0 +1,17 @@
+# Model configuration
+model_name: resnet18  # Options: resnet18, resnet50
+
+# Training hyperparameters
+learning_rate: 0.0005
+batch_size: 32
+num_epochs: 15
+optimizer: adam  # Options: adam, sgd
+weight_decay: 0.0005
+
+# Data configuration
+image_size: 224
+train_val_split: 0.8
+num_workers: 4
+
+# Paths
+checkpoint_dir: experiments
