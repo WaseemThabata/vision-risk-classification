@@ -130,17 +130,17 @@ def analyze_errors(y_true, y_pred, class_names=['safe', 'unsafe']):
     
     print("\n=== Decision Impact Analysis ===")
     if false_negatives > false_positives:
-        print("⚠️  FALSE NEGATIVES ARE MORE CRITICAL")
+        print("FALSE NEGATIVES ARE MORE CRITICAL")
         print("Impact: Classifying unsafe situations as safe poses direct safety risks.")
         print("Consequence: Users may be exposed to harmful or dangerous content/situations.")
         print("Recommendation: Consider lowering the decision threshold to reduce false negatives.")
     elif false_positives > false_negatives:
-        print("⚠️  FALSE POSITIVES ARE MORE FREQUENT")
+        print("FALSE POSITIVES ARE MORE FREQUENT")
         print("Impact: Over-blocking safe content may reduce user experience.")
         print("Consequence: Valid use cases may be unnecessarily restricted.")
         print("Recommendation: Balance is needed - false negatives are typically more critical for safety.")
     else:
-        print("✓ False positives and false negatives are balanced.")
+        print("False positives and false negatives are balanced.")
     
     print("\nFor safety-critical applications, prioritize reducing FALSE NEGATIVES.")
     print("Missing an unsafe case has higher real-world impact than over-filtering.")

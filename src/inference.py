@@ -107,9 +107,9 @@ def main():
     print(f"Threshold: {args.threshold}")
     
     if predicted_class == 'unsafe':
-        print("\n⚠️  WARNING: This image is classified as UNSAFE")
+        print("\nWARNING: This image is classified as UNSAFE")
     else:
-        print("\n✓ This image is classified as SAFE")
+        print("\nThis image is classified as SAFE")
 
 
 if __name__ == '__main__':
