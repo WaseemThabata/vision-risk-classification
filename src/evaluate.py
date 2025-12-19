@@ -57,7 +57,7 @@ def evaluate_model(model, data_loader, device, class_names=['safe', 'unsafe']):
             _, preds = torch.max(outputs, 1)
             
             all_preds.extend(preds.cpu().numpy())
-            all_labels.extend(labels.cpu.numpy())
+            all_labels.extend(labels.cpu().numpy())
             all_probs.extend(probs.cpu().numpy())
     
     # Calculate metrics

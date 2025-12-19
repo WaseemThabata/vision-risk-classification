@@ -125,22 +125,15 @@ def train(config_path='configs/config.yaml', data_path='data/processed'):
     train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
     
     # Apply different transforms
+    train_dataset.dataset.transform = train_transform
     val_dataset.dataset.transform = val_transform
     
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config['batch_size'],
-        shuffle=True,
-        num_workers=config['num_workers']
-    )
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=config['batch_size'],
-        shuffle=False,
-        num_workers=config['num_workers']
-    )
+    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], 
+                             shuffle=True, num_workers=config['num_workers'])
+    val_loader = DataLoader(val_dataset, batch_size=config['batch_size'], 
+                           shuffle=False, num_workers=config['num_workers'])
     
-    print(f"Train size: {len(train_dataset)}, Val size: {len(val_dataset)}")
+    print(f"Train samples: {len(train_dataset)}, Val samples: {len(val_dataset)}")
     
     # Build model
     model = build_model(num_classes=2, model_name=config['model_name'])
@@ -148,49 +141,43 @@ def train(config_path='configs/config.yaml', data_path='data/processed'):
     
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
-    
-    if config['optimizer'] == 'adam':
-        optimizer = optim.Adam(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=config['learning_rate'],
-            weight_decay=config['weight_decay']
-        )
-    else:
-        optimizer = optim.SGD(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=config['learning_rate'],
-            weight_decay=config['weight_decay'],
-            momentum=0.9
-        )
+    optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'], 
+                          weight_decay=config['weight_decay'])
     
     # Training loop
     best_val_acc = 0.0
-    checkpoint_dir = config['checkpoint_dir']
-    os.makedirs(checkpoint_dir, exist_ok=True)
+    train_losses, val_losses = [], []
+    train_accs, val_accs = [], []
     
     for epoch in range(config['num_epochs']):
+        print(f"\nEpoch {epoch+1}/{config['num_epochs']}")
+        
         train_loss, train_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, val_acc = validate(model, val_loader, criterion, device)
         
-        print(f"Epoch [{epoch+1}/{config['num_epochs']}]")
-        print(f"  Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
-        print(f"  Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
+        train_losses.append(train_loss)
+        val_losses.append(val_loss)
+        train_accs.append(train_acc)
+        val_accs.append(val_acc)
+        
+        print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
+        print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
         
         # Save best model
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            save_path = os.path.join(checkpoint_dir, f"best_model_{timestamp}.pth")
+            save_path = os.path.join(config['checkpoint_dir'], f'best_model_{timestamp}.pth')
+            os.makedirs(config['checkpoint_dir'], exist_ok=True)
             torch.save({
                 'epoch': epoch,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_acc': val_acc,
-                'val_loss': val_loss
             }, save_path)
-            print(f"  Saved best model to {save_path}")
+            print(f"✓ Saved best model: {save_path}")
     
-    print(f"\nTraining completed. Best validation accuracy: {best_val_acc:.2f}%")
+    print(f"\nTraining complete! Best Val Acc: {best_val_acc:.2f}%")
 
 
 if __name__ == '__main__':
