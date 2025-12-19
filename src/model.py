@@ -18,7 +18,7 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
     """
     # Load pretrained model
     if model_name == 'resnet18':
-        model = models.resnet18(pretrained=True)
+        model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
         num_features = model.fc.in_features
         # Replace final fully connected layer
         model.fc = nn.Sequential(
@@ -27,7 +27,7 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
         )
     
     elif model_name == 'resnet50':
-        model = models.resnet50(pretrained=True)
+        model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
         num_features = model.fc.in_features
         model.fc = nn.Sequential(
             nn.Dropout(0.3),
@@ -35,7 +35,7 @@ def build_model(num_classes: int = 2, model_name: str = 'resnet18', freeze_backb
         )
     
     elif model_name == 'mobilenet_v2':
-        model = models.mobilenet_v2(pretrained=True)
+        model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
         num_features = model.classifier[1].in_features
         # Replace final classifier
         model.classifier = nn.Sequential(
